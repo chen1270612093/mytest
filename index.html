@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+	#map{
+		width: 800px;
+		height: 600px;
+		position: relative;
+		background-color: pink;
+	}
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+	<script>
+		//-创建食物
+		function Food(map,x,y,width,height,color){
+			this.map=document.getElementById(map);
+			this.x=x||0;
+			this.y=y||0;
+			this.width=width||20;
+			this.height=height||20;
+			this.color=color||"black";
+			this.food=null;
+		}
+		Food.prototype.creat=function(){
+			this.food&&this.food.remove()
+			var div=document.createElement("div")
+			this.x=parseInt(Math.random()*(this.map.offsetWidth/this.width))*this.width;
+			this.y=parseInt(Math.random()*(this.map.offsetHeight/this.height))*this.height;
+			div.style.position="absolute"
+			div.style.left=this.x+"px";
+			div.style.top=this.y+"px";
+			div.style.width=this.width+"px";
+			div.style.height=this.height+"px";
+			div.style.backgroundColor=this.color;
+			this.map.appendChild(div)
+			this.food=div;
+		}
+		// var food=new Food("map");
+		// food.creat()
+		//穿件蛇的身体
+		function Snake(map,width,height,move){
+			this.map=document.getElementById(map);
+			this.width=width||20;
+			this.height=height||20;
+			this.move=move||"right"
+			this.data=[
+				{
+					x:3,
+					y:2,
+					color:"red"
+				},{
+					x:2,
+					y:2,
+					color:"blue"
+				},{
+					x:1,
+					y:2,
+					color:"blue"
+				}
+			];2
+			this.body=[];
+		}
+		Snake.prototype.creat1=function(){
+			var that=this;
+			for (var i = 0; i < this.body.length; i++) {
+				this.body[i].remove();
+			}
+			for (var i = 0; i < this.data.length; i++) {
+				var div=document.createElement("div");
+				div.style.width=this.width+"px";
+				div.style.height=this.height+"px";
+				div.style.position="absolute";
+				div.style.left=this.data[i].x*that.width+"px"
+				div.style.top=this.data[i].y*that.height+"px";
+				div.style.backgroundColor=this.data[i].color;
+				that.map.appendChild(div);
+				that.body.push(div);
+			}
+		}
+		//蛇移动一步
+		Snake.prototype.move1=function(food){
+			for(var i= this.data.length-1;i>0;i--){
+				this.data[i].x=this.data[i-1].x;
+				this.data[i].y=this.data[i-1].y
+			}
+			switch(this.move){
+				case "right":
+					this.data[0].x+=1;	
+				break;
+				case "left":
+					this.data[0].x-=1;	
+				break;
+				case "top":
+					this.data[0].y-=1;	
+				break;
+				case "bottom":
+					this.data[0].y+=1;	
+				break;
+			}
+			//吃食物蛇头的位置
+			    var headX = this.data[0].x * this.width;
+    			var headY = this.data[0].y * this.height;
+    			if(food.x==headX&&food.y==headY){
+    				 var lastNode=this.data[this.data.length-1];
+    				 var lastNode = this.data[this.data.length - 1];
+				      this.data.push({
+				        x : lastNode.x,
+				        y : lastNode.y,
+				        color : 'blue'
+				      });
+				    food.creat()
+    			}
+		}
+
+
+
+		// var snake=new Snake("map");
+		// snake.creat1();
+		// snake.move1();
+		function Game(map){
+			this.map=document.getElementById(map);
+			this.food=new Food(map);
+			this.snake=new Snake(map);
+			this.timer=null;
+		}
+		Game.prototype.init=function(){
+			this.food.creat();
+			this.start();
+			this.event();
+		}
+		Game.prototype.start=function(){
+			 var that = this;
+			this.timer=setInterval(function(){
+				that.snake.move1(that.food);
+				that.snake.creat1();
+				var maxX = that.map.offsetWidth - that.snake.width;
+      		    var maxY = that.map.offsetHeight - that.snake.height;
+				 if(that.snake.data[0].x * that.snake.width < 0 || that.snake.data[0].x * that.snake.width > maxX){
+					clearInterval(that.timer);
+					alert("game over")
+				};
+				 if(that.snake.data[0].y * that.snake.height < 0 || that.snake.data[0].y * that.snake.height > maxY){
+					clearInterval(that.timer);
+					alert("game over")
+				}
+			},150)
+		};
+		Game.prototype.event=function(){
+			var that=this;
+			document.onkeydown=function(e){
+				 e = e || window.event;
+				 switch(e.keyCode){
+				 	 case 38:
+				 	 that.snake.move = 'top';
+				 	 break;
+				 	 case 39:
+				 	 that.snake.move = 'right';
+				 	 break;
+				 	 case 40:
+				 	 that.snake.move = 'bottom';
+				 	 break;
+				 	 case 37:
+				 	 that.snake.move = 'left';
+				 	 break;
+				 }
+			}
+		}
+		var game=new Game("map");
+		game.init();
+	</script>
+</body>
+</html>
